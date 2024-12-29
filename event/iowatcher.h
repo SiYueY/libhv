@@ -30,6 +30,7 @@
 #endif
 #endif
 
+/* IO多路复用统一抽象接口 */
 int iowatcher_init(hloop_t* loop);
 int iowatcher_cleanup(hloop_t* loop);
 int iowatcher_add_event(hloop_t* loop, int fd, int events);

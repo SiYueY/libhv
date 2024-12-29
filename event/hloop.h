@@ -61,15 +61,16 @@ typedef enum {
     unsigned    active  :1; \
     unsigned    pending :1;
 
+/* 事件 */
 #define HEVENT_FIELDS                   \
-    hloop_t*            loop;           \
-    hevent_type_e       event_type;     \
-    uint64_t            event_id;       \
-    hevent_cb           cb;             \
-    void*               userdata;       \
-    void*               privdata;       \
-    struct hevent_s*    pending_next;   \
-    int                 priority;       \
+    hloop_t*            loop;           \   /* 事件所属的事件循环 */
+    hevent_type_e       event_type;     \   /* 事件类型 */
+    uint64_t            event_id;       \   /* 事件ID */
+    hevent_cb           cb;             \   /* 事件回调 */
+    void*               userdata;       \   /* 用户数据 */
+    void*               privdata;       \   /* 私有数据 */
+    struct hevent_s*    pending_next;   \   /* 待处理事件 */
+    int                 priority;       \   /* 事件优先级 */
     HEVENT_FLAGS
 
 // sizeof(struct hevent_s)=64 on x64

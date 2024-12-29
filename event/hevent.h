@@ -28,48 +28,50 @@ ARRAY_DECL(hio_t*, io_array);
 ARRAY_DECL(hsignal_t*, signal_array);
 QUEUE_DECL(hevent_t, event_queue);
 
+/* 事件循环 */
 struct hloop_s {
-    uint32_t    flags;
-    hloop_status_e status;
-    uint64_t    start_ms;       // ms
-    uint64_t    start_hrtime;   // us
-    uint64_t    end_hrtime;
-    uint64_t    cur_hrtime;
-    uint64_t    loop_cnt;
-    long        pid;
-    long        tid;
-    void*       userdata;
+    uint32_t    flags;          /* 事件循环flags */
+    hloop_status_e status;      /* 事件循环状态：running/stop/pause */
+    uint64_t    start_ms;       /* 开始时间(现实时间realtime，单位ms) */
+    uint64_t    start_hrtime;   /* 开始时间(线性时间，不受系统时间调整影响，单位us) */
+    uint64_t    end_hrtime;     /* 结束时间 */
+    uint64_t    cur_hrtime;     /* 当前时间 */
+    uint64_t    loop_cnt;       /* 循环计数 */
+    long        pid;            /* 进程id */
+    long        tid;            /* 线程id */
+    void*       userdata;       /* 用户自定义数据 */
 //private:
     // events
-    uint32_t                    intern_nevents;
-    uint32_t                    nactives;
-    uint32_t                    npendings;
+    uint32_t                    intern_nevents;     /* 内部激活事件 */
+    uint32_t                    nactives;           /* 激活事件数量 */
+    uint32_t                    npendings;          /* 待处理事件数量 */
     // pendings: with priority as array.index
-    hevent_t*                   pendings[HEVENT_PRIORITY_SIZE];
+    hevent_t*                   pendings[HEVENT_PRIORITY_SIZE];     /* 事件优先级队列 */
     // signals
-    struct signal_array         signals;
-    uint32_t                    nsignals;
+    struct signal_array         signals;        /* 信号数组 */
+    uint32_t                    nsignals;       /* 信号数量 */
     // idles
-    struct list_head            idles;
-    uint32_t                    nidles;
+    struct list_head            idles;          /* 空闲事件链表 */
+    uint32_t                    nidles;         /* 空闲事件数量 */
     // timers
     struct heap                 timers;     // monotonic time
     struct heap                 realtimers; // realtime
     uint32_t                    ntimers;
     // ios: with fd as array.index
-    struct io_array             ios;
-    uint32_t                    nios;
+    struct io_array             ios;        /* fd事件数组 */
+    uint32_t                    nios;       /* fd事件数量 */
     // one loop per thread, so one readbuf per loop is OK.
-    hbuf_t                      readbuf;
-    void*                       iowatcher;
+    hbuf_t                      readbuf;    /* 读缓冲区 */
+    void*                       iowatcher;  /* IO事件监视器 */
     // custom_events
-    int                         eventfds[2];
-    event_queue                 custom_events;
-    hmutex_t                    custom_events_mutex;
+    int                         eventfds[2];    /* 事件fd，用于唤醒事件循环 */
+    event_queue                 custom_events;  /* 自定义事件队列 */
+    hmutex_t                    custom_events_mutex;    /* 自定义事件队列互斥锁 */
 };
 
 uint64_t hloop_next_event_id();
 
+/* 空闲事件 */
 struct hidle_s {
     HEVENT_FIELDS
     uint32_t    repeat;
@@ -77,6 +79,7 @@ struct hidle_s {
     struct list_node node;
 };
 
+/* 定时器事件 */
 #define HTIMER_FIELDS                   \
     HEVENT_FIELDS                       \
     uint32_t    repeat;                 \
@@ -87,6 +90,7 @@ struct htimer_s {
     HTIMER_FIELDS
 };
 
+/* 超时事件 */
 struct htimeout_s {
     HTIMER_FIELDS
     uint32_t    timeout;                \
@@ -103,6 +107,7 @@ struct hperiod_s {
 
 QUEUE_DECL(offset_buf_t, write_queue);
 // sizeof(struct hio_s)=416 on linux-x64
+/* IO事件 */
 struct hio_s {
     HEVENT_FIELDS
     // flags

@@ -7,6 +7,7 @@
 #include "hevent.h"
 #include "overlapio.h"
 
+/* IOCP context */
 typedef struct iocp_ctx_s {
     HANDLE      iocp;
 } iocp_ctx_t;
